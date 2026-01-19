@@ -185,12 +185,35 @@ Comprehensive metrics aggregated across all folds:
     "metrics": {
       "auc": {"mean": 0.568, "std": 0.086},
       "accuracy": {"mean": 0.56, "std": 0.049},
-      ...
+      "precision": {"mean": 0.565, "std": 0.054},
+      "recall_sensitivity": {"mean": 0.54, "std": 0.080},
+      "specificity": {"mean": 0.580, "std": 0.098},
+      "f1": {"mean": 0.549, "std": 0.057}
     },
-    "confusion_totals": [[TN, FP], [FN, TP]]
+    "confusion_totals": [[29, 21], [23, 27]]
   },
-  "image_only": { ... },
-  "fusion": { ... }
+  "image_only": {
+    "metrics": {
+      "auc": {"mean": 0.648, "std": 0.130},
+      "accuracy": {"mean": 0.58, "std": 0.06},
+      "precision": {"mean": 0.479, "std": 0.249},
+      "recall_sensitivity": {"mean": 0.60, "std": 0.341},
+      "specificity": {"mean": 0.56, "std": 0.314},
+      "f1": {"mean": 0.516, "std": 0.262}
+    },
+    "confusion_totals": [[28, 22], [20, 30]]
+  },
+  "fusion": {
+    "metrics": {
+      "auc": {"mean": 0.592, "std": 0.060},
+      "accuracy": {"mean": 0.51, "std": 0.08},
+      "precision": {"mean": 0.409, "std": 0.211},
+      "recall_sensitivity": {"mean": 0.620, "std": 0.343},
+      "specificity": {"mean": 0.40, "std": 0.352},
+      "f1": {"mean": 0.487, "std": 0.254}
+    },
+    "confusion_totals": [[20, 30], [19, 31]]
+  }
 }
 ```
 
@@ -252,11 +275,3 @@ Potential enhancements for production deployment:
 - Hyperparameter optimization (Optuna, Ray Tune)
 - Model quantization for deployment
 - Integration with clinical workflow systems
-
-## License
-
-This project is provided as-is for evaluation purposes.
-
-## Contact
-
-For questions or issues, please refer to the repository issues page.
