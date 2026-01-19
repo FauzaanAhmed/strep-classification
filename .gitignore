@@ -211,4 +211,5 @@ outputs/
 data/images/
 .venv/
 .DS_Store
+sample_images_100/
 .DS_Store
