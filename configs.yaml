@@ -1,22 +1,39 @@
 seed: 42
 n_splits: 5
+
 csv_path: data/sample_dataset_100.csv
 images_dir: data/images
 output_dir: outputs
+
 image_size: 224
-epochs: 25
+epochs: 30
 batch_size: 16
 num_workers: 2
-lr: 0.0003
+
+# Discriminative learning rates
+lr_head: 0.0003
+lr_backbone: 0.000015
+
 weight_decay: 0.0001
-warmup_epochs: 1
-patience: 5
+warmup_epochs: 2
+patience: 7
 amp: true
-dropout: 0.2
-freeze_backbone_epochs: 2
+dropout: 0.3  # Increased for better regularization
+freeze_backbone_epochs: 3  # Freeze longer for stability
 label_smoothing: 0.0
+
+# Focal loss for class imbalance
+use_focal_loss: true
+focal_alpha: 0.25
+focal_gamma: 2.0
+
 run_symptoms_only: true
 run_image_only: true
 run_fusion: true
+
+# light test-time augmentation during validation
+use_tta: true
+
+# interpretability: minimal
 export_gradcam: true
 gradcam_total_images: 6

@@ -1,8 +1,7 @@
 """Data loading and preprocessing utilities."""
 
-import os
 from pathlib import Path
-from typing import Callable, List, Tuple
+from typing import Callable, Tuple
 
 import numpy as np
 import pandas as pd
@@ -28,11 +27,11 @@ class StrepDataset(Dataset):
         self.transform = transform
         self.return_symptoms = return_symptoms
 
-        # Get symptom columns (exclude ImageName and label)
+        # Symptom columns
         self.symptom_cols = [col for col in df.columns if col not in ["ImageName", "label"]]
 
-        # Convert labels to binary (Positive=1, Negative=0)
-        self.labels = (self.df["label"].str.lower() == "positive").astype(int).values
+        # Labels: Positive=1, Negative=0
+        self.labels = (self.df["label"].astype(str).str.lower() == "positive").astype(int).values
 
     def __len__(self) -> int:
         return len(self.df)
@@ -40,9 +39,8 @@ class StrepDataset(Dataset):
     def __getitem__(self, idx: int) -> Tuple:
         row = self.df.iloc[idx]
         image_name = row["ImageName"]
-        label = self.labels[idx]
+        label = int(self.labels[idx])
 
-        # Load image
         image_path = self.images_dir / image_name
         if not image_path.exists():
             raise FileNotFoundError(f"Image not found: {image_path}")
@@ -60,16 +58,29 @@ class StrepDataset(Dataset):
 
 
 def get_transforms(image_size: int = 224, is_train: bool = True) -> transforms.Compose:
-    """Get image transforms for training or validation."""
+    """
+    Small-data-friendly transforms:
+    - Train: RandomResizedCrop + mild jitter/rotation/flip
+    - Val: deterministic resize
+    """
+    mean = [0.485, 0.456, 0.406]
+    std = [0.229, 0.224, 0.225]
+
     if is_train:
         return transforms.Compose(
             [
-                transforms.Resize((image_size, image_size)),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2),
+                transforms.Resize((image_size + 32, image_size + 32)),
+                transforms.RandomCrop(image_size),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.15, hue=0.05)],
+                    p=0.7,
+                ),
                 transforms.RandomRotation(12),
                 transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),  # Small translations
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transforms.Normalize(mean=mean, std=std),
+                transforms.RandomErasing(p=0.1, scale=(0.02, 0.1)),  # Light erasing for regularization
             ]
         )
     else:
@@ -77,7 +88,7 @@ def get_transforms(image_size: int = 224, is_train: bool = True) -> transforms.C
             [
                 transforms.Resize((image_size, image_size)),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                transforms.Normalize(mean=mean, std=std),
             ]
         )
 
@@ -86,19 +97,17 @@ def load_data(csv_path: str, images_dir: str) -> pd.DataFrame:
     """Load CSV and verify images exist."""
     df = pd.read_csv(csv_path)
 
-    # Verify images exist
-    missing_images = []
+    missing = []
+    images_dir = Path(images_dir)
     for image_name in df["ImageName"]:
-        image_path = Path(images_dir) / image_name
-        if not image_path.exists():
-            missing_images.append(image_name)
+        if not (images_dir / image_name).exists():
+            missing.append(image_name)
 
-    if missing_images:
-        raise FileNotFoundError(f"Missing images: {missing_images[:5]}...")
+    if missing:
+        raise FileNotFoundError(f"Missing images (showing up to 5): {missing[:5]}")
 
-    # Verify labels
-    unique_labels = df["label"].str.lower().unique()
-    if not all(label in ["positive", "negative"] for label in unique_labels):
-        raise ValueError(f"Unexpected labels: {unique_labels}")
+    labels = df["label"].astype(str).str.lower().unique()
+    if not all(l in ["positive", "negative"] for l in labels):
+        raise ValueError(f"Unexpected labels: {labels}")
 
     return df
