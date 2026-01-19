@@ -270,8 +270,9 @@ The project ensures reproducibility through:
 ## Future Improvements
 
 Potential enhancements for production deployment:
-- Ensemble methods combining multiple models
-- Advanced augmentation techniques (MixUp, CutMix)
-- Hyperparameter optimization (Optuna, Ray Tune)
-- Model quantization for deployment
-- Integration with clinical workflow systems
+
+- **Expand dataset size and diversity** to reduce variance and improve generalization
+- **Redesign fusion model** with stronger regularization and simpler architectures to address miscalibration
+- **Apply probability calibration and threshold tuning** to optimize operating points for clinical use
+- **Incorporate richer clinical variables** to enhance multimodal learning
+- **Perform structured error analysis** guided by interpretability tools to identify systematic failure modes
