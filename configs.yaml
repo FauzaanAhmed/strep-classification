@@ -27,6 +27,9 @@ use_focal_loss: true
 focal_alpha: 0.25
 focal_gamma: 2.0
 
+# Gradient clipping for training stability
+max_grad_norm: 1.0
+
 run_symptoms_only: true
 run_image_only: true
 run_fusion: true
